@@ -1,0 +1,10 @@
+**
+!.dockerignore
+!Dockerfile
+!src/
+!src/DemoWeb/
+!src/DemoWeb/**
+src/**/bin
+src/**/bin/**
+src/**/obj
+src/**/obj/**

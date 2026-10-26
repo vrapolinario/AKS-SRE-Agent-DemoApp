@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-settings
+  namespace: sre-demo
+data:
+  failure-mode: healthy

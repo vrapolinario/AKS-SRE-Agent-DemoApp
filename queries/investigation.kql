@@ -1,0 +1,39 @@
+// Run in the shared Log Analytics workspace, not the Application Insights requests-table view.
+// Replace the resource IDs below with the values in .state/deployment.json.
+let applicationInsightsId = "<applicationInsightsId>";
+AppRequests
+| where TimeGenerated > ago(30m)
+| where _ResourceId =~ applicationInsightsId
+| where AppRoleName == "aks-sre-demo"
+| summarize Requests=count(), Http5xx=countif(toint(ResultCode) between (500 .. 599))
+    by bin(TimeGenerated, 1m)
+| order by TimeGenerated asc
+
+// Select and run this query separately to inspect failed requests and their trace IDs.
+let applicationInsightsId = "<applicationInsightsId>";
+AppRequests
+| where TimeGenerated > ago(30m)
+| where _ResourceId =~ applicationInsightsId
+| where AppRoleName == "aks-sre-demo"
+| where toint(ResultCode) between (500 .. 599)
+| project TimeGenerated, Name, ResultCode, Success, OperationId, AppRoleInstance
+| order by TimeGenerated desc
+
+// Correlate the OperationId above with application errors.
+let applicationInsightsId = "<applicationInsightsId>";
+AppTraces
+| where TimeGenerated > ago(30m)
+| where _ResourceId =~ applicationInsightsId
+| where AppRoleName == "aks-sre-demo"
+| where SeverityLevel >= 3
+| project TimeGenerated, Message, OperationId, Properties
+| order by TimeGenerated desc
+
+// Inspect JSON console logs from the AKS application and traffic generator.
+let aksId = "<aksId>";
+ContainerLogV2
+| where TimeGenerated > ago(30m)
+| where _ResourceId =~ aksId
+| where PodNamespace == "sre-demo"
+| project TimeGenerated, PodName, ContainerName, LogMessage
+| order by TimeGenerated desc
