@@ -77,13 +77,14 @@ before deploying.
 
 Run from this project directory in PowerShell 7. Choose a **new dedicated
 resource group**; deployment refuses an existing group without matching demo
-ownership tags. All deployment choices are variables/parameters:
+ownership tags. All deployment choices are variables/parameters. Replace every
+`<...>` placeholder below with your own deployment values before running:
 
 ```powershell
-$SubscriptionId = '0da15c50-e7d8-4f57-9e33-5980ff653569'
-$ResourceGroup = 'viniap-aks-sre-demo'
-$Location = 'westus2'
-$NamePrefix = 'sredemo'          # 3-12 lowercase letters/digits, starting with a letter
+$SubscriptionId = '<subscription-id>'
+$ResourceGroup = '<resource-group-name>'
+$Location = '<azure-region>'
+$NamePrefix = '<name-prefix>'   # 3-12 lowercase letters/digits, starting with a letter
 $NodeCount = 2
 $NodeVmSize = 'Standard_D4s_v5'  # system pools need at least 4 vCPUs per node
 $KubernetesVersion = ''        # empty uses the AKS default supported version
@@ -110,6 +111,12 @@ The script uses explicit subscription arguments and a dedicated
 Kubernetes context. `.state\deployment.json` records resource IDs and the image.
 Treat the kubeconfig as a credential. Both files are ignored by Git.
 Use a separate project copy for each simultaneously active deployment.
+
+Before sharing the project folder, remove `.state\deployment.json`,
+`.state\kubeconfig`, and generated `src\DemoWeb\bin` and `src\DemoWeb\obj`
+folders. Git ignores these paths, but they can still be included in folder
+copies or archives. Removing local state does not delete Azure resources and
+prevents the demo management scripts from using that state until it is recreated.
 
 Re-running deployment reuses deterministically named resources, builds a new
 image tag, and **resets the failure mode to healthy**. It is not the recommended
